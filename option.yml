@@ -1,0 +1,68 @@
+#
+# @Author: wjm
+# @Date: 2019-10-13 21:45:10
+# @LastEditTime: 2019-10-13 21:46:06
+# @Description: file content
+# 
+
+name: Net
+algorithm: msddn #maunetv4_ns #ugcn_s4nba0  pan_unfolding_v4
+nEpochs: 500
+gpu_mode: True
+save_best: True
+gpus: [1]
+threads: 4  #num_works
+log_dir: /home/manman/xuanhua/newpan/log/
+
+
+seed: 123 #123
+checkpoint: /home/your_folder/your_folder/newpan/checkpoint
+data_dir_train: /media/your_folder/data_disk/yaogan/WV3_data/train128
+data_dir_eval: /media/your_folder/data_disk/yaogan/WV3_data/test128
+#data_dir_train: /media/your_folder/data_disk/yaogan/GF2_data/train128
+#data_dir_eval: /media/your_folder/data_disk/yaogan/GF2_data/test128
+#data_dir_train: /media/your_folder/data_disk/yaogan/WV3_data/train128
+#data_dir_eval: /media/your_folder/data_disk/yaogan/WV3_data/test128
+
+source_ms: ms
+source_pan: pan
+
+pretrain:
+  pretrained: False
+  pre_sr: msddn_4_1670917477/bestSSIM.pth  #unet_pan_4_1669425995/best.pth
+  pre_folder: /home/your_folder/your_folder/newpan/checkpoint/
+
+test:  #用于指标测试的代码
+  algorithm: msddn #pannetffft
+  type: test #[test, eval]
+  data_dir: /media/your_folder/data_disk/yaogan/WV3_data/test128
+  source_ms: ms
+  source_pan: pan
+  model: you_folder/bestSSIM.pth #unet_pan_4_1669431831/best.pth #unet_pan_4_1669425995/best.pth #MAUNetV3_4_1638761339/best.pth  #ugcn_s4nb_4_1630230918/best.pth  latest
+  #model: ugcn_s4nb_4_1630368984/best.pth
+  save_dir: /home/your_folder/your_folder/result/net_WV3
+
+data:
+  upsacle:  4
+  batch_size: 4 #4
+  patch_size: 32
+  data_augmentation: False
+  n_colors: 4
+  rgb_range: 255
+  normalize : False
+  
+schedule:
+  lr: 5e-4 #5e-6 #1e-2
+  decay: 1000
+  gamma: 0.1
+  optimizer: ADAM #[ADAM, SGD, RMSprop]
+  momentum: 0.9 #SGD momentum
+  beta1: 0.9 #ADAM beta
+  beta2: 0.999 #ADAM beta
+  epsilon: 1e-8 #ADAM epsilon
+  alpha: 0.9 #RMSprop alpha
+  weight_dency: 0
+  gclip: 40 #0.4   #0.4  0.04
+  loss: L1 #[MSE, L1]
+  use_YCbCr: False
+
