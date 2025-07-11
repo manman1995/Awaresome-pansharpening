@@ -63,7 +63,6 @@ class SpatialGCN(nn.Module):
         self.node_in2 = nn.Conv2d(plane, inter_plane, kernel_size=1)
         self.node_in3 = nn.Conv2d(plane, inter_plane, kernel_size=1)
     
-
         self.conv_wg = nn.Conv1d(inter_plane, inter_plane, kernel_size=1, bias=False)
         self.bn_wg = BatchNorm1d(inter_plane)
         self.softmax = nn.Softmax(dim=2)
