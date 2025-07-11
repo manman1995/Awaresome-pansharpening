@@ -54,3 +54,36 @@ class Net(nn.Module):
         x_f = self.output_conv(x_f)
 
         return x_f
+
+class SpatialGCN(nn.Module):
+    def __init__(self, plane):
+        super(SpatialGCN, self).__init__()
+        inter_plane = plane // 2
+        self.node_in1 = nn.Conv2d(plane, inter_plane, kernel_size=1)
+        self.node_in2 = nn.Conv2d(plane, inter_plane, kernel_size=1)
+        self.node_in3 = nn.Conv2d(plane, inter_plane, kernel_size=1)
+
+        self.conv_wg = nn.Conv1d(inter_plane, inter_plane, kernel_size=1, bias=False)
+        self.bn_wg = BatchNorm1d(inter_plane)
+        self.softmax = nn.Softmax(dim=2)
+
+        self.out = nn.Sequential(nn.Conv2d(inter_plane, plane, kernel_size=1))#,BatchNorm2d(plane)
+
+    def forward(self, x):
+        # b, c, h, w = x.size()
+        node_in1 = self.node_in1(x)
+        node_in2 = self.node_in2(x)
+        node_in3 = self.node_in3(x)
+        b,c,h,w = node_in1.size()
+        node_in1 = node_in1.view(b, c, -1).permute(0, 2, 1)
+        node_in3 = node_in3.view(b, c, -1)
+        node_in2 = node_in2.view(b, c, -1).permute(0, 2, 1)
+        AV = torch.bmm(node_in3,node_in2)
+        AV = self.softmax(AV)
+        AV = torch.bmm(node_in1, AV)
+        AV = AV.transpose(1, 2).contiguous()
+        AVW = self.conv_wg(AV)
+        AVW = self.bn_wg(AVW)
+        AVW = AVW.view(b, c, h, -1)
+        out = F.relu_(self.out(AVW) + x)
+        return out
